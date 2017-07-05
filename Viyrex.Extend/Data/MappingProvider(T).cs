@@ -6,6 +6,11 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+
+    /// <summary>
+    /// 物件關聯供應者
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class MappingProvider<T>
     {
         internal MappingProvider(DataTable table)
@@ -58,8 +63,17 @@
         }
 
     }
+    /// <summary>
+    /// 關聯擴充
+    /// </summary>
     public static class MappingExtension
     {
+        /// <summary>
+        /// 將 <see cref="DataRow"/> 關聯至 <see cref="T"/> 物件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="table"></param>
+        /// <returns></returns>
         public static MappingProvider<T> Mapping<T>(this DataTable table)
             => new MappingProvider<T>(table);
 
