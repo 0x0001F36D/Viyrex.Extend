@@ -16,7 +16,7 @@
 
         private readonly IDictionary<string, MemberInfo> RelationShip;
 
-        private readonly DataTable Table;
+        private readonly DataTable Table; 
 
         /// <summary>
         /// 讓欄位與物件欄位產生關連
