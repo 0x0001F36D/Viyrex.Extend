@@ -33,7 +33,7 @@
         public MappingProvider<T> MapTo(string columnName, Expression<Func<T, object>> selector)
         {
             if (this.Table.Columns.Cast<DataColumn>().All(x => x.ColumnName != columnName)) throw new ArgumentException(nameof(columnName));
-            var member = (selector.Body as MemberExpression)?.Member ?? throw new NotSupportedException("Not supported this lambda expression");
+            var member = (selector.Body as MemberExpression)?.Member ?? throw new NotSupportedException("Not supported statement lambda expression");
             this.RelationShip.Add(columnName, member);
             return this;
         }
