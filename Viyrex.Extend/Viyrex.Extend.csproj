@@ -42,6 +42,9 @@
   <ItemGroup>
     <Compile Include="Data\MappingProvider%28T%29.cs" />
     <Compile Include="Enum%28T%29.cs" />
+    <Compile Include="Net\CookieAwareClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
