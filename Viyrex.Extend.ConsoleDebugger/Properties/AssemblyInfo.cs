@@ -1,11 +1,9 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
-[assembly: AssemblyTitle("Viyrex.Extend")]
-[assembly: AssemblyProduct("Viyrex.Extend")]
+[assembly: AssemblyTitle("Viyrex.Extend.ConsoleDebugger")]
+[assembly: AssemblyProduct("Viyrex.Extend.ConsoleDebugger")]
 [assembly: AssemblyCopyright("Copyright © Viyrex(aka Yuyu) 2017")]
-[assembly: ComVisible(false)]
-[assembly: Guid("ba5acde3-8b52-434c-926c-4798a18ecfa1")]
-[assembly: AssemblyVersion("1.0.2.6468")]
+[assembly: Guid("f8f5c8e0-d244-4cfc-8c9f-0c80f4f549c1")]
+[assembly: AssemblyVersion("1.0.3.6468")]
 [assembly: AssemblyFileVersion("2017.9.16.0027")]
