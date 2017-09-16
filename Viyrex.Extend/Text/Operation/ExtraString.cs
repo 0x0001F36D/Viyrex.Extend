@@ -5,38 +5,41 @@ namespace System.Text.Operation
     using System.Collections.Generic;
     using System.Linq;
     using System.Globalization;
-    public sealed class ExtraString : IEnumerable<char>, IEnumerable, IComparable, ICloneable, IConvertible, IComparable<ExtraString>, IEquatable<ExtraString>
+    using System.Runtime.Serialization;
+
+    public sealed class ExtraString : IEnumerable<char>, IEnumerable, IComparable, ICloneable, IConvertible, IComparable<ExtraString>, IEquatable<ExtraString> ,ISerializable
     {
 
         private string _token;
 
         public string Source => this._token;
 
+        public uint Length => (uint)this._token.Length;
 
         #region Constructors
         public ExtraString(string token)
-            => this._token = token;
+            => this._token = token ?? string.Empty;
+
+        public ExtraString(IEnumerable<string> token):this(string.Join(null,token))
+        {
+        }
 
         public ExtraString(IEnumerable<char> token) : this(new string(token.ToArray()))
         {
         }
 
-        public ExtraString(IEnumerable<byte> token) : this(new string(token.Select(x => (char)x).ToArray()))
-        {
-        }
-
-        public unsafe ExtraString(char* token) : this(new string(token))
+        unsafe public ExtraString(char* token) : this(new string(token))
         {
         }
         #endregion
 
         #region Convert Operators
-        public unsafe static implicit operator ExtraString(char* token)
+        unsafe public static implicit operator ExtraString(char* token)
             => new ExtraString(token);
         public static implicit operator ExtraString(char[] token)
             => new ExtraString(token);
-        public static implicit operator ExtraString(byte[] token)
-            => new ExtraString(token);
+        public static explicit operator ExtraString(char token)
+            => new ExtraString(token.ToString());
         public static implicit operator ExtraString(string token)
             => new ExtraString(token);
 
@@ -44,9 +47,7 @@ namespace System.Text.Operation
             => token._token;
         public static explicit operator char[] (ExtraString token)
             => token.ToArray();
-        public unsafe static implicit operator char* (ExtraString token)
-            => token;
-        public static implicit operator byte[] (ExtraString token)
+        unsafe public static implicit operator char* (ExtraString token)
             => token;
         #endregion
 
@@ -150,11 +151,26 @@ namespace System.Text.Operation
             => ((IConvertible)this._token).ToType(conversionType, provider);
         #endregion
 
+        #region ISerializable
+        private ExtraString(SerializationInfo info, StreamingContext context): this(info.GetString(nameof(_token)))
+        {
+        }
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+            => info.AddValue(nameof(_token), this._token);
+        #endregion
+
 
         public char this[uint index]
         {
-            get => this._token[(int)index];
-            set => this._token = this._token.Remove((int)index, 1).Insert((int)index, value.ToString());
+            get => this._token.Length > index ? this._token[(int)index] : char.MinValue;
+        
+            set
+            {
+                if (this._token.Length > index)
+                    this._token = this._token.Remove((int)index, 1).Insert((int)index, value.ToString());
+                else
+                    this._token += value;
+            }
         }
 
         /*
@@ -167,6 +183,59 @@ namespace System.Text.Operation
             {
             }
         }*/
+
+            
+        public bool Contains(ExtraString token)
+            => this._token.Contains(token);
+        public bool Contains(char token, out IEnumerable<uint> indexes)
+            => this.Contains((ExtraString)token, out indexes);
+        public bool Contains(ExtraString token, out IEnumerable<uint> indexes)
+        {
+            indexes = new List<uint>();
+            int index = 0;
+            while ((index = this._token.IndexOf(token, index)) != -1)
+                (indexes as List<uint>).Add((uint)index++);
+            return (indexes as List<uint>).Count > 0;
+        }
+        
+
+        public class Index
+        {
+            internal Index(uint startIndex, ExtraString token)
+            {
+                this.StartIndex = startIndex;
+                this.Token = token;
+                this.Length = token.Length;
+            }
+
+
+            public uint StartIndex { get; }
+            public ExtraString Token { get; }
+            public uint Length { get; }
+
+            public string PrettyPrint()
+                => $"[{this.Token}, {this.Length}] = {this.Token}";
+
+            public override bool Equals(object obj) => obj is Index p ? p.GetHashCode() == this.GetHashCode() : false;
+            public override int GetHashCode() => this.StartIndex.GetHashCode() + this.Token.GetHashCode();
+        }
+        public IEnumerable<Index> Mapping(ExtraString token, params ExtraString[] tokens)
+        {
+            return mapping();
+            IEnumerable<Index> mapping()
+            {
+                if (token == null)
+                    yield break;
+
+                var list = new HashSet<ExtraString>(tokens?.Where(x=> x!= null) ?? new ExtraString[0]) { token };
+
+                foreach (var t in list)
+                    if (this.Contains(t, out var collection))
+                        foreach (var index in collection)
+                            yield return new Index(index, t);
+            }
+        }
+        
 
         public ExtraString Range(uint startIndex, uint stopIndex, uint step = 1)
         {
@@ -217,7 +286,7 @@ namespace System.Text.Operation
 
         public bool StartsWith(ExtraString token, bool ignoreCase = false, CultureInfo culture = default(CultureInfo))
             => this._token.StartsWith(token, ignoreCase, culture ?? CultureInfo.CurrentCulture);
-        public bool EndstWith(ExtraString token, bool ignoreCase = false, CultureInfo culture = default(CultureInfo))
+        public bool EndsWith(ExtraString token, bool ignoreCase = false, CultureInfo culture = default(CultureInfo))
             => this._token.EndsWith(token, ignoreCase, culture ?? CultureInfo.CurrentCulture);
 
 
@@ -234,11 +303,9 @@ namespace System.Text.Operation
 
 
         public ExtraString Concat(object arg, params object[] args)
-            => args.Aggregate(string.Concat(this._token, arg), (t, v) => string.Concat(t, v));
-
-        public byte[] ToBytes()
-            => this;
-        public char[] ToChars()
+            => args?.Aggregate(string.Concat(this._token, arg), (t, v) => string.Concat(t, v)) ?? string.Concat(this._token, arg);
+        
+        public char[] ToCharArray()
             => (char[])this;
     }
 }
