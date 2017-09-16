@@ -236,6 +236,11 @@ namespace System.Text.Operation
             }
         }
         
+        public double Similarity(ExtraString token)
+            => (double)(from a in from t in this._token select t.ToString()
+                    join b in from t in token._token select t.ToString() on a equals b
+                    select a).Count() / (this.Length + token.Length);
+        
 
         public ExtraString Range(uint startIndex, uint stopIndex, uint step = 1)
         {

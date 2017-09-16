@@ -49,6 +49,11 @@ namespace Viyrex.Extend.ConsoleDebugger
             //output:
             //@@@@
 
+            ExtraString d = "ABCDEFG";
+            ExtraString e = "ABCD_F_";
+            Console.WriteLine(d.Similarity(e));
+            //output:
+            //0.357142857142857
             Console.ReadKey();
             return;
         }
