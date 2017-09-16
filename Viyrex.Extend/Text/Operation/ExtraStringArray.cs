@@ -22,17 +22,21 @@ namespace System.Text.Operation
         private ExtraStringArray(IEnumerable<ExtraString> tokens)
             => this._tokens = tokens.ToList();
 
-        public ExtraString this[int index]
+        public ExtraString this[uint index]
         {
-            get => this._tokens[index];
-            set => this._tokens[index] = value;
+            get => this._tokens[(int)index];
+            set => this._tokens[(int)index] = value;
         }
 
-        public char this[int x, int y, bool xySwap = false]
+        public char this[uint x, uint y, bool xySwap = false]
         {
             get => this[xySwap ? y : x][xySwap ? x : y];
             set => this[xySwap ? y : x][xySwap ? x : y] = value;
         }
+
+        public int Length => this._tokens.Count;
+
+        #region Convert Operators
 
 
         public static implicit operator ExtraStringArray(ExtraString[] tokens)
@@ -54,6 +58,10 @@ namespace System.Text.Operation
             => tokens.Select(x => x.Source).ToArray();
 
 
+        #endregion
+
+        #region Operators
+
 
         public static ExtraStringArray operator *(ExtraStringArray left_array, ExtraStringArray right_array)
             => left_array.SelectMany(x => x * right_array).ToArray();
@@ -73,12 +81,22 @@ namespace System.Text.Operation
 
         public static ExtraStringArray operator +(ExtraStringArray left_array, ExtraStringArray right_array)
             => left_array.Zip(right_array, (l, r) => l + r).ToArray();
+        
+        #endregion
 
 
         public IEnumerator<ExtraString> GetEnumerator()
             => ((IEnumerable<ExtraString>)this._tokens).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator()
             => ((IEnumerable<ExtraString>)this._tokens).GetEnumerator();
+
+
+
+        public ExtraString Arrange(object separator = null)
+            => string.Join(separator?.ToString(), this._tokens);
+        
+
+
 
     }
 }

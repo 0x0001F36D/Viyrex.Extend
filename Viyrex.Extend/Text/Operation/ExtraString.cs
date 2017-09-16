@@ -103,12 +103,12 @@ namespace System.Text.Operation
             => this._token.Clone();
         #endregion
 
-        #region IComparable<DString>
+        #region IComparable<ExtraString>
         int IComparable<ExtraString>.CompareTo(ExtraString other)
             => this._token.CompareTo(other.ToString());
         #endregion
 
-        #region IEquatable
+        #region IEquatable<ExtraString>
         bool IEquatable<ExtraString>.Equals(ExtraString other)
             => this._token.Equals(other.ToString());
         #endregion
@@ -151,11 +151,53 @@ namespace System.Text.Operation
         #endregion
 
 
-        public char this[int index]
+        public char this[uint index]
         {
-            get => this._token[index];
-            set => this._token = this._token.Remove(index, 1).Insert(index, value.ToString());
+            get => this._token[(int)index];
+            set => this._token = this._token.Remove((int)index, 1).Insert((int)index, value.ToString());
         }
+
+        /*
+        public ExtraString this[int start, int stop,int step]
+        {
+            get
+            {
+            }
+            set
+            {
+            }
+        }*/
+
+        public ExtraString Range(uint startIndex, uint stopIndex, uint step = 1)
+        {
+            if (step == 0)
+                return string.Empty;
+
+            startIndex = checkLimit(startIndex);
+            stopIndex = checkLimit(stopIndex);
+
+            return new ExtraString(iter());
+
+            IEnumerable<char> iter()
+            {
+                if (startIndex < stopIndex)
+                    for (uint i = startIndex; i <= stopIndex; i += step)
+                        yield return this._token[(int)i];
+                else if (startIndex > stopIndex)
+                    for (int i = (int)startIndex; i >= stopIndex; i -= (int)step)
+                        yield return this._token[i];
+                else
+                    yield return this._token[(int)startIndex];
+            }
+
+            uint checkLimit(uint index)
+            {
+                if (index >= int.MaxValue)
+                    index = (uint)int.MaxValue;
+                return (uint)(this._token.Length - 1 < (int)index ? this._token.Length - 1 : (int)index);
+            }
+        }
+
 
         public ExtraStringArray Split(params byte[] separetor)
             => this.Split(separetor.Select(x => (char)x).ToArray());
